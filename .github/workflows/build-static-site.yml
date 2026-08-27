@@ -43,15 +43,17 @@ jobs:
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
           git fetch origin master
-          deploy_dir="/tmp/tmp.7WzACairgy"
-          git worktree add --detach "" origin/master
-          rsync -a --delete --exclude=.git dist/ "/"
-          cp CNAME "/CNAME"
-          git -C "" switch -C master origin/master
-          git -C "" add -A
-          if git -C "" diff --cached --quiet; then
+          site_dir="$RUNNER_TEMP/elo-static-site"
+          rm -rf "$site_dir"
+          mkdir -p "$site_dir"
+          cp -R dist/. "$site_dir/"
+          cp CNAME "$site_dir/CNAME"
+          git switch -C master origin/master
+          rsync -a --delete --exclude='.git' "$site_dir/" ./
+          git add -A
+          if git diff --cached --quiet; then
             echo "Static site is unchanged."
           else
-            git -C "" commit -m "build: deploy dev static site"
-            git -C "" push origin HEAD:master
+            git commit -m "build: deploy dev static site"
+            git push origin HEAD:master
           fi
