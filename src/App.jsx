@@ -70,7 +70,9 @@ function BuildGame({ game }) {
         setUserId(response.userId);
       },
       function (error) {
-        console.log(error); // Failure
+        if (error.code !== 401) {
+          console.error(error);
+        }
       },
     );
 
@@ -113,7 +115,7 @@ function BuildGame({ game }) {
   return (
     <div key={game}>
       <Grid container spacing={2} sx={{ maxWidth: 800 }}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TableContainer component={Paper}>
             <Table aria-label="simple table">
               <TableHead>
@@ -157,22 +159,22 @@ function BuildGame({ game }) {
           </TableContainer>
         </Grid>
         {wait && (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <LinearProgress />
           </Grid>
         )}
         {!wait && (
           <>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Item>{playerPair[0]}</Item>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Item>V.S.</Item>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Item>{playerPair[1]}</Item>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Button
                 style={{ width: "100%" }}
                 variant="contained"
@@ -183,7 +185,7 @@ function BuildGame({ game }) {
                 👈 Left is Better 👈
               </Button>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Button
                 style={{ width: "100%" }}
                 variant="contained"
@@ -194,7 +196,7 @@ function BuildGame({ game }) {
                 🤝 Tie 🤝
               </Button>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Button
                 style={{ width: "100%" }}
                 variant="contained"
@@ -223,9 +225,7 @@ function CustomTabPanel(props) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
+        <Box sx={{ p: 3 }}>{children}</Box>
       )}
     </div>
   );
@@ -302,7 +302,7 @@ function App() {
             aria-label="basic tabs example"
           >
             {games.map((game, index) => (
-              <Tab label={labelMap[game]} {...a11yProps(index)} />
+              <Tab key={game} label={labelMap[game]} {...a11yProps(index)} />
             ))}
           </Tabs>
         </Box>
@@ -325,4 +325,3 @@ function App() {
 }
 
 export default App;
-
