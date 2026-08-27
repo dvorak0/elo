@@ -262,20 +262,15 @@ function App() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    localStorage.setItem("gameID", JSON.stringify(newValue));
   };
 
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem("gameID"));
-    if (items) {
-      setValue(items);
-    }
     databases.listDocuments(DB_ID, GAMES_COLLECTION_ID).then((response) => {
-      // setgame using response.documents
       const games = response.documents.map((item) => item.Game);
-      // shuffle games
-      games.sort(() => Math.random() - 0.5);
-      setGames(games);
+      const defaultGame = "AI Companies";
+      const otherGames = games.filter((game) => game !== defaultGame);
+      otherGames.sort(() => Math.random() - 0.5);
+      setGames([defaultGame, ...otherGames]);
     });
   }, []);
 
