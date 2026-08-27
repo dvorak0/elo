@@ -1,0 +1,57 @@
+name: Build static site
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-static-site
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out dev
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Deploy build to master
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git fetch origin master
+          deploy_dir="/tmp/tmp.7WzACairgy"
+          git worktree add --detach "" origin/master
+          rsync -a --delete --exclude=.git dist/ "/"
+          cp CNAME "/CNAME"
+          git -C "" switch -C master origin/master
+          git -C "" add -A
+          if git -C "" diff --cached --quiet; then
+            echo "Static site is unchanged."
+          else
+            git -C "" commit -m "build: deploy dev static site"
+            git -C "" push origin HEAD:master
+          fi
