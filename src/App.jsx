@@ -288,6 +288,7 @@ function App() {
     Editors: "编辑器",
     Assets: "投资",
     Celebrities: "历史影响力",
+    "AI Companies": "AI/Robotics公司",
   };
   return (
     <>
