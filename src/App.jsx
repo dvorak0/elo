@@ -30,6 +30,7 @@ function BuildGame({ game }) {
   //const [matches, setMatches] = useState([]);
   const [playerPair, setPlayerPair] = useState([]);
   const [submitCount, setSubmitCount] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const [wait, setWait] = useState(true);
   const [userId, setUserId] = useState(null);
 
@@ -97,7 +98,13 @@ function BuildGame({ game }) {
   }, [game, submitCount]);
 
   async function submitMatch(winner) {
-    databases
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
+    setWait(true);
+    await databases
       .createDocument(DB_ID, MATCHES_COLLECTION_ID, ID.unique(), {
         Game: game,
         A: playerPair[0],
@@ -105,11 +112,11 @@ function BuildGame({ game }) {
         Winner: winner,
         UserID: userId,
         Date: new Date().toISOString(),
-      })
-      .then((response) => {});
+      });
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     randomPick(players);
-    setSubmitCount(submitCount + 1);
-    setWait(true);
+    setSubmitCount((count) => count + 1);
+    setSubmitting(false);
   }
 
   return (
