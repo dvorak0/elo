@@ -49,7 +49,11 @@ jobs:
           cp -R dist/. "$site_dir/"
           cp CNAME "$site_dir/CNAME"
           git switch -C master origin/master
-          rsync -a --delete --exclude='.git' "$site_dir/" ./
+          git clean -fdx
+          cp -R "$site_dir/." ./
+          script_path="$(sed -nE 's/.*src="([^"]+\.js)".*/\1/p' index.html)"
+          test -n "$script_path"
+          test -f ".${script_path}"
           git add -A
           if git diff --cached --quiet; then
             echo "Static site is unchanged."
