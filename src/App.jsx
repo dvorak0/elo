@@ -100,7 +100,7 @@ function BuildGame({ game, userId }) {
         UserID: userId,
         Date: new Date().toISOString(),
       });
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     randomPick(players);
     setSubmitCount((count) => count + 1);
     setSubmitting(false);
