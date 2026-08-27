@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
-function BuildGame({ game }) {
+function BuildGame({ game, userId }) {
   const [players, setPlayers] = useState([]);
   const [scores, setScores] = useState({});
   //const [matches, setMatches] = useState([]);
@@ -32,7 +32,6 @@ function BuildGame({ game }) {
   const [submitCount, setSubmitCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [wait, setWait] = useState(true);
-  const [userId, setUserId] = useState(null);
 
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -55,7 +54,6 @@ function BuildGame({ game }) {
 
   const databases = new Databases(client);
   const functions = new Functions(client);
-  const account = new Account(client);
 
   function randomPick(players) {
     do {
@@ -66,17 +64,6 @@ function BuildGame({ game }) {
   }
 
   useEffect(() => {
-    account.getSession("current").then(
-      function (response) {
-        setUserId(response.userId);
-      },
-      function (error) {
-        if (error.code !== 401) {
-          console.error(error);
-        }
-      },
-    );
-
     const promise = functions.createExecution("6606ed296d0cfbcabcc0", game);
 
     promise.then(
@@ -266,10 +253,28 @@ function App() {
   const GAMES_COLLECTION_ID = "65cec746cd3d46950c55";
 
   const [value, setValue] = useState(0);
+  const [userId, setUserId] = useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  useEffect(() => {
+    async function initializeSession() {
+      try {
+        const session = await account.getSession("current");
+        setUserId(session.userId);
+      } catch (error) {
+        if (error.code !== 401) {
+          throw error;
+        }
+        const session = await account.createAnonymousSession();
+        setUserId(session.userId);
+      }
+    }
+
+    initializeSession();
+  }, []);
 
   useEffect(() => {
     databases.listDocuments(DB_ID, GAMES_COLLECTION_ID).then((response) => {
@@ -311,7 +316,7 @@ function App() {
         </Box>
         {games.map((game, index) => (
           <CustomTabPanel value={value} index={index} key={index}>
-            <BuildGame key={index} game={game} />
+            <BuildGame key={index} game={game} userId={userId} />
           </CustomTabPanel>
         ))}
       </Box>
